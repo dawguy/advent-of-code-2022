@@ -4,33 +4,34 @@
 (def data (adv/parse txt {}))
 (def line (first data))
 
-(defn split-container [line]
-  [(subs line 0 (/ (count line) 2)) (subs line (/ (count line) 2))])
-(defn to-set [[left right]]
-  [(set left) (set right)]
+(defn to-set [v]
+  (set v)
 )
-(defn combine-rucksacks [[left right]] (clojure.set/intersection left right))
+(defn combine-rucksacks
+  ([sets]
+   (combine-rucksacks (drop 3 sets) (vec [(apply clojure.set/intersection (take 3 sets))])))
+  ([sets l]
+   (if (empty? sets)
+     l
+     (combine-rucksacks (drop 3 sets) (conj l (apply clojure.set/intersection (take 3 sets)))))))
 (defn to-priority [s]
   (let [v (int (first s))]
     (if (< 96 v)                                            ; \A 65, \a 97
       (- v 96)                                              ; (lower-case - 96) = [1,26]
       (- v 38))))                                           ; (upper-case - 38) = [27,52]
 
+;(int \a)
+;(int \A)
 ;(- (int \a) 96)
 ;(- (int \z) 96)
 ;(- (int \A) 38)
 ;(- (int \Z) 38)
-;
-;(int \a)
-;(int \A)
 
 (defn calc [txt]
   (reduce + 0
           (->>
             (adv/parse txt {})
-            (map split-container)
             (map to-set)
-            (map combine-rucksacks)
+            (combine-rucksacks)
             (map to-priority)
-            ))
-  )
+            )))
