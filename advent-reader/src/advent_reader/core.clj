@@ -1,12 +1,5 @@
 (ns advent-reader.core)
 
-(def day-1 (slurp "./resources/day-1.txt"))
-(def day-2 (slurp "./resources/day-2.txt"))
-(def txt day-2)
-(def opts {:parse-vals false
-           :group-by-empty-line false
-           :split-by-character nil})
-
 (defn parse-lines [lines apply-fn?]
   (if (not apply-fn?)
     lines
