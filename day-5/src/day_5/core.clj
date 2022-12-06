@@ -43,16 +43,21 @@
         to-crates (get crates to)]
     (-> crates
         (assoc from (drop qty from-crates))
-        (assoc to (apply conj to-crates (take qty from-crates))))
-    )
-  )
+        (assoc to (concat (take qty from-crates) to-crates)) ; Part 2 answer
+        ; (assoc to (apply conj to-crates (take qty from-crates))) ; Part 1 answer
+        )))
+
+; Useful seq joining tips
+;(flatten (conj (seq [1 2 3]) (seq [4 5])))
+;(concat (seq [4 5]) (seq [1 2 3]))
+;(apply conj (seq [1 2 3]) (seq [4 5]))
 
 (defn move-crates [crates moves]
   (loop [c crates
          [[qty from to] & rem] moves]
-    (clojure.pprint/write (into (sorted-map) c))
-    (prn (str "qty: " qty ", from: " from ", to:" to))
-    (prn "\n")
+    ;(clojure.pprint/write (into (sorted-map) c))
+    ;(prn (str "qty: " qty ", from: " from ", to:" to))
+    ;(prn "\n")
     (if (nil? qty)
       c
       (recur (move-crates-step c qty from to) rem))))
