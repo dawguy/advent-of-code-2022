@@ -45,7 +45,12 @@
          (def opts {:parse-vals          true
                     :split-by-characters [" "]
                     :group-by-empty-line false})
+         (parse txt opts)
+         (def txt (slurp "./resources/advent-reader-2.txt"))
+         (def opts {:parse-vals          true
+                    :split-by-characters ["," "-"]
+                    :group-by-empty-line false})
+         (parse txt opts)
          (def lines [["1" "2" "3"] ["3" "4" "5"] ["6" "-" "9"] ["9" "9" "9"]])
          (def apply-fn? true)
-         (parse txt opts)
          ,)
