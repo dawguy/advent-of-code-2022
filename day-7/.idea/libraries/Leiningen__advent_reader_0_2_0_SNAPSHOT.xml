@@ -1,0 +1,9 @@
+<component name="libraryTable">
+  <library name="Leiningen: advent-reader:0.2.0-SNAPSHOT">
+    <CLASSES>
+      <root url="jar://$MAVEN_REPOSITORY$/advent-reader/advent-reader/0.2.0-SNAPSHOT/advent-reader-0.2.0-SNAPSHOT.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>
