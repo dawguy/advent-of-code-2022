@@ -6,48 +6,42 @@
 (def data (adv/parse txt {:split-by-characters [" "]
                      :parse-vals true}))
 
-(defn ls [commands cursor] "Should have the ($, ls) command pre-dropped. Returns a map of the contents of the directory"
-  ;(prn (first commands))
-  (assoc cursor :files
-                (loop [t {}
-                       [c & rem-c] (rest commands)]
-                  ;(prn c)
-                  (if (or (= "$" (first c)) (nil? c))
-                    t
-                    (recur (assoc t (second c) {:val  (first c)
-                                                :name (second c)})
-                           rem-c)))))
-(defn cd [commands cursor]
-    (if (= ".." (second (first commands)))
-      (let [parent (get-in cursor [".."])]
-        (assoc parent :cursors (conj (:cursors parent) cursor)))
-      {".."  cursor
-       :name (nth (first commands) 2)}))
-(defn parse-command [command]
-  (if (not (= (first command) "$"))
-    #(identity %2)
-    (cond                                                   ; is a command
-      (= (second command) "ls") ls
-      (= (second command) "cd") cd
-      :default #(identity %2)
-      )))
-(defn process [data]
-  (loop [commands data
-         cursor {}]
-    (if (empty? commands)
-      cursor
-      (recur (rest commands)
-             ((parse-command (first commands)) commands cursor)))))
+; Copied from assoc-in, but added a summation portion as well.
+(defn assoc-and-sum [m [k & ks] v]
+  (assoc (if ks
+           (assoc m k (assoc-and-sum (get m k) ks v))
+           (assoc m k (conj (get m k []) v)))
+    :sum
+    (+ (get m :sum 0) (:val v))))
+(defn add-field [vals levels c]
+  (if (= (first c) "dir")
+    vals
+    (assoc-and-sum vals (conj levels :files) {:name (second c)
+                                              :val  (first c)})))
+(defn calc [data]
+  (loop [[c & rem-c] data
+         levels []
+         vals {}]
+      (cond (nil? c) vals
+            (not (= (first c) "$"))
+              (recur rem-c levels (add-field vals levels c))
+            (and (= (second c) "cd") (= (nth c 2) ".."))
+              (recur rem-c (vec (drop-last levels)) vals)
+            (= (second c) "cd")
+              (recur rem-c (conj levels (nth c 2)) vals)
+            :else (recur rem-c levels vals)
+            )))
 
-(comment "Helper funcs for debugging"
-         (ls sample-ls-data {".." nil
-                             :name "/"})
-         (def command (seq ["$" "cd" "a"]))
-         (def commands data)
-         (def commands (take 9 data))
-         (process commands)
-         (def cursor {".." {:cursors [{:a 1}]}
-                      :name "123"
-                      :files [{:b 1} {:b 2}]})
-         (process data)
+(comment "Dev calls"
+         (def data-real data)
+         (def data-sample data)
+         (add-field {:a {:b 1}} [:a] [1234 "abc"])
+         (add-field {:a {:b 1}} [:a] ["dir" "abc"])
+         (calc data-sample)
+         (calc data-real)
+         (def levels ["/" "e"])
+         (def c (seq ["$" "cd" "e"]))
+         (vec (drop 1 [:a :b :c]))
+         (prn)
          ,)
+
