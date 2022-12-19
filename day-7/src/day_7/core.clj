@@ -18,7 +18,7 @@
     vals
     (assoc-and-sum vals (conj levels :files) {:name (second c)
                                               :val  (first c)})))
-(defn calc [data]
+(defn gen-dirs [data]
   (loop [[c & rem-c] data
          levels []
          vals {}]
@@ -31,17 +31,34 @@
               (recur rem-c (conj levels (nth c 2)) vals)
             :else (recur rem-c levels vals)
             )))
+(defn calc [data]
+  (let [dirs (gen-dirs data)]
+    (loop [ret []
+           stack [dirs]]
+      (let [s (first stack)]
+        (if (nil? s)
+          ret
+          (if (< (:sum s) 100000)
+            (recur (conj ret (:sum s)) (concat (rest stack) (map second (dissoc (dissoc s :files) :sum))))
+            (recur ret (concat (rest stack) (map second (dissoc (dissoc s :files) :sum))))
+            ))))))
+(defn get-sizes [data]
+  (sort (calc data)))
 
 (comment "Dev calls"
          (def data-real data)
          (def data-sample data)
          (add-field {:a {:b 1}} [:a] [1234 "abc"])
          (add-field {:a {:b 1}} [:a] ["dir" "abc"])
+         (def dirs (gen-dirs data-sample))
+         (def dirs (gen-dirs data-real))
+         (def stack [dirs])
+         (def s (first stack))
+         (reduce + 0 (calc data-real))
          (calc data-sample)
-         (calc data-real)
+         (def clean-s (dissoc (dissoc s :files) :sum))
          (def levels ["/" "e"])
          (def c (seq ["$" "cd" "e"]))
          (vec (drop 1 [:a :b :c]))
-         (prn)
          ,)
 
