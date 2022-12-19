@@ -38,14 +38,16 @@
       (let [s (first stack)]
         (if (nil? s)
           ret
-          (if (< (:sum s) 100000)
             (recur (conj ret (:sum s)) (concat (rest stack) (map second (dissoc (dissoc s :files) :sum))))
-            (recur ret (concat (rest stack) (map second (dissoc (dissoc s :files) :sum))))
-            ))))))
+            )))))
 (defn get-sizes [data]
-  (sort (calc data)))
+  (let [sizes (sort (calc data))
+        tar (- 30000000 (- 70000000 (last sizes)))]
+    (filter #(< tar %) sizes)))
 
 (comment "Dev calls"
+         (first (get-sizes data-real))
+         (first (get-sizes data-sample))
          (def data-real data)
          (def data-sample data)
          (add-field {:a {:b 1}} [:a] [1234 "abc"])
